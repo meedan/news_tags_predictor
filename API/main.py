@@ -84,10 +84,16 @@ tokenizer = AutoTokenizer.from_pretrained("/Users/ahmednasser/Downloads/fastapi_
 trainer = Trainer(model=model)
 # trainer.model = model.cuda()
 
-@app.get("/is_politics/{title}")
-def read_root(title: str, request: Request):
-    client_host = request.client.host
-    val_encodings = tokenizer([title],
+
+from pydantic import BaseModel
+from typing import Union
+
+class Title(BaseModel):
+    title: str
+@app.post("/items/")
+async def is_politics(title: Title):
+    print("xxxx")
+    val_encodings = tokenizer([title.title],
                               truncation=True,
                               padding=True,
                               # max_length=model.config.max_position_embeddings
@@ -99,4 +105,4 @@ def read_root(title: str, request: Request):
         is_politics = 0
     else:
         is_politics = 1
-    return {"is_politics": is_politics, "title": title}
+    return {"is_politics": is_politics, "title": title.title}
