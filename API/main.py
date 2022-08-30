@@ -78,9 +78,9 @@ class MultiDialectDataset(Dataset):
         return len(self.labels)
 
 print("Loading Model...")
-model = AutoModelForSequenceClassification.from_pretrained("/Users/ahmednasser/Downloads/fastapi_news_tags_classifier/model/best_ckpt", num_labels = 2)
+model = AutoModelForSequenceClassification.from_pretrained("meedan/brazilianpolitics", num_labels = 2)
 print("Loading Tokenizer...")
-tokenizer = AutoTokenizer.from_pretrained("/Users/ahmednasser/Downloads/fastapi_news_tags_classifier/model/best_ckpt")
+tokenizer = AutoTokenizer.from_pretrained("meedan/brazilianpolitics")
 trainer = Trainer(model=model)
 # trainer.model = model.cuda()
 
