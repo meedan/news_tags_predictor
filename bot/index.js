@@ -23,7 +23,7 @@ const replyToCheck = (annotated_id, team_slug, callback) => {
     
       createTag(input:{
         clientMutationId: $clientMutationId,
-        tag: "politics",
+        tag: "🤖 politics",
         annotated_id: $annotated_id,
         annotated_type: "ProjectMedia"
       }) {
