@@ -88,12 +88,11 @@ trainer = Trainer(model=model)
 from pydantic import BaseModel
 from typing import Union
 
-class Title(BaseModel):
-    title: str
-@app.post("/items/")
-async def is_politics(title: Title):
-    print("xxxx")
-    val_encodings = tokenizer([title.title],
+class Text(BaseModel):
+    text: str
+@app.post("/brazil/is_politics/")
+async def is_politics(text: Text):
+    val_encodings = tokenizer([text.text],
                               truncation=True,
                               padding=True,
                               # max_length=model.config.max_position_embeddings
@@ -105,4 +104,5 @@ async def is_politics(title: Title):
         is_politics = 0
     else:
         is_politics = 1
-    return {"is_politics": is_politics, "title": title.title}
+    return {"is_politics": is_politics,"prob_is_not_politics": str(val_pred.predictions[0][0]),
+            "prob_is_politics": str(val_pred.predictions[0][1]),"text": text.text}
