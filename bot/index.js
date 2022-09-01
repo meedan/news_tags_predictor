@@ -91,57 +91,70 @@ const replyToCheck = (annotated_id, team_slug, callback) => {
 
 
 exports.handler = (event, context, callback) => {
+
+  
+  
+  
   // replyToCheck("1383818", "check-testing", callback);
   const data = JSON.parse(event.body);
   console.log('JSON.parse(event.body)', data);
   if (data.event === 'create_project_media') {
     const headers = null;
     const pmid = data.data.dbid.toString();
-    // const projectId = data.data.project.dbid;
-    const title = data.data.title.toString();
-    console.log('title', title);
-
-    console.log('annotated_id', pmid);
-    // if (pmid == "1383812") {
-      
+    const projectId = data.object.project_id.toString();
+    console.log("projectId",projectId);
+    if(projectId == '15374'){
+      const title = data.data.title.toString();
+      console.log('title', title);
+  
+      console.log('annotated_id', pmid);
+      // if (pmid == "1383812") {
       const https = require('https');
-      let url = "https://187a-85-14-96-187.eu.ngrok.io/is_politics/"+title
+  
+      var postData = JSON.stringify({
+          'text' : title
+      });
       
+      var options = {
+        hostname: 'bd6b-2a02-a311-803e-2d80-5ddd-178-c3bf-2954.eu.ngrok.io',
+        // port: 443,
+        // path: 'brazil/is_politics',
+        method: 'POST',
+        // headers: {
+        //     'Content-Type': 'application/x-www-form-urlencoded',
+        //     'Content-Length': postData.length
+        //   }
+      };
       
-      const promise = new Promise(function(resolve, reject) {
-        https.get(url, (res) => {
-          console.log("https.get(url, (res)");
-          res.setEncoding('utf8');
-          let responseBody = '';
+      var req = https.request(options, (res) => {
+        console.log("https.get(url, (res)");
+        res.setEncoding('utf8');
+        let responseBody = '';
       
-          res.on('data', (chunk) => {
-              responseBody += chunk;
-          });
+        res.on('data', (chunk) => {
+            responseBody += chunk;
+        });
       
-          res.on('end', () => {
-            console.log("responseBody");
-            const json_obj = JSON.parse(responseBody);
-            console.log(json_obj);
-            if (json_obj['is_politics'] == 1){
-              console.log('daaaaa', "daaa");
-
-              // changeStatusToReverseImageSearch(pmid,data.team.slug,json_obj, callback);
-              replyToCheck(pmid, data.team.slug, callback);
-            }
-          });
+        res.on('end', () => {
+          console.log("responseBody");
+          const json_obj = JSON.parse(responseBody);
+          console.log(json_obj);
+          if (json_obj['is_politics'] == "1"){
+            console.log('daaaaa', "daaa");
       
-          resolve(res.statusCode)
-        }).on('error', (e) => {
-          console.log("2");
-          reject(Error(e))
-          })
-      })
+            replyToCheck(pmid, data.team.slug, callback);
+          }
+        });
+      });
       
+      req.on('error', (e) => {
+        console.error(e);
+      });
       
-      
-      
-      
-      
+      req.write(postData);
+      req.end();
+    }
+   
   } 
   else {
     callback(null);
