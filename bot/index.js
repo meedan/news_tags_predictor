@@ -12,7 +12,7 @@ const replyToCheck = (annotated_id, team_slug, callback) => {
   const mutationQuery = `($annotated_id: String!, $clientMutationId: String!) {
     createTag(input:{
       clientMutationId: $clientMutationId,
-      tag: "🤖 Politics",
+      tag: "⚡ Politics",
       annotated_id: $annotated_id,
       annotated_type: "ProjectMedia"
     }) {
