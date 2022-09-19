@@ -46,6 +46,7 @@ const replyToCheck = (annotated_id, team_slug, callback) => {
 
 
 exports.handler = (event, context, callback) => {
+  const max_length = 2000;
   const data = JSON.parse(event.body);
   console.log('JSON.parse(event.body)', data);
   if (data.event === 'create_project_media') {
@@ -59,6 +60,8 @@ exports.handler = (event, context, callback) => {
 
 
       title = title.replace(/(?:https?|ftp):\/\/[\n\S]+/g, ''); //remove urls
+      title = title.substring(0,max_length);
+      console.log("title",title)
       var title_without_spaces_andurl = title.replace(/\s/g, ''); // remove spaces
       if(title_without_spaces_andurl == ""){
         callback(null);
@@ -89,7 +92,6 @@ exports.handler = (event, context, callback) => {
           });
 
           res.on('end', () => {
-            console.log("responseBody");
             const json_obj = JSON.parse(responseBody);
             console.log(json_obj);
             if (json_obj['is_politics'] == "1"){
