@@ -2,7 +2,7 @@ const config = require('./config.js'),
       Lokka = require('lokka').Lokka,
       util = require('util'),
       Transport = require('lokka-transport-http').Transport;
-      
+
 const replyToCheck = (annotated_id, team_slug, callback) => {
   const vars = {
     annotated_id,
@@ -23,13 +23,14 @@ const replyToCheck = (annotated_id, team_slug, callback) => {
         }
       }
     }
-    
+
   }`;
 
   const headers = {
     'X-Check-Token': config.checkApiAccessToken
   };
-  const transport = new Transport(config.live.checkApiUrl + '/api/graphql?team=' + team_slug, { headers, credentials: false, timeout: 120000 });
+  //change to live or qa
+  const transport = new Transport(config.qa.checkApiUrl + '/api/graphql?team=' + team_slug, { headers, credentials: false, timeout: 120000 });
   const client = new Lokka({ transport });
 
   client.mutate(mutationQuery, vars)
@@ -51,54 +52,62 @@ exports.handler = (event, context, callback) => {
     const headers = null;
     const pmid = data.data.dbid.toString();
     const projectId = data.object.project_id.toString();
-    // if(projectId == '15374'){
-      const title = data.data.title.toString();
+    const type = data.data.type;
+    if(type=="Claim" || type=="Link" || type=="Blank"){
+      var title = data.data.title.toString();
 
-      // const https = require('https');
-      const http = require('http');
-  
-      var postData = JSON.stringify({
-          'text' : title
-      });
-      
-      var options = {
-        hostname: 'ml-brpolitics-1305663479.eu-west-1.elb.amazonaws.com',
-        // port: 443,
-        path: '/brazil/is_politics/',
-        method: 'POST'//,
-        //headers: {
-        //  'Content-Type': 'application/json',
-        //  'Content-Length': postData.length,
-        //}
-      };
-      
-      var req = http.request(options, (res) => {
-        res.setEncoding('utf8');
-        let responseBody = '';
-      
-        res.on('data', (chunk) => {
-            responseBody += chunk;
+
+
+      title = title.replace(/(?:https?|ftp):\/\/[\n\S]+/g, ''); //remove urls
+      var title_without_spaces_andurl = title.replace(/\s/g, ''); // remove spaces
+      if(title_without_spaces_andurl == ""){
+        callback(null);
+
+      }else{
+        const http = require('http');
+
+        var postData = JSON.stringify({
+            'text' : title
         });
-      
-        res.on('end', () => {
-          console.log("responseBody");
-          const json_obj = JSON.parse(responseBody);
-          console.log(json_obj);
-          if (json_obj['is_politics'] == "1"){
-            replyToCheck(pmid, data.team.slug, callback);
-          }
+        var options = {
+          hostname: 'ml-brpolitics-1305663479.eu-west-1.elb.amazonaws.com',
+          // port: 443,
+          path: '/brazil/is_politics/',
+          method: 'POST'//,
+          //headers: {
+          //  'Content-Type': 'application/json',
+          //  'Content-Length': postData.length,
+          //}
+        };
+
+        var req = http.request(options, (res) => {
+          res.setEncoding('utf8');
+          let responseBody = '';
+
+          res.on('data', (chunk) => {
+              responseBody += chunk;
+          });
+
+          res.on('end', () => {
+            console.log("responseBody");
+            const json_obj = JSON.parse(responseBody);
+            console.log(json_obj);
+            if (json_obj['is_politics'] == "1"){
+              replyToCheck(pmid, data.team.slug, callback);
+            }
+          });
         });
-      });
-      
-      req.on('error', (e) => {
-        console.error(e);
-      });
-      
-      req.write(postData);
-      req.end();
-    // }
-   
-  } 
+
+        req.on('error', (e) => {
+          console.error(e);
+        });
+
+        req.write(postData);
+        req.end();
+      }
+    }
+
+  }
   else {
     callback(null);
   }
